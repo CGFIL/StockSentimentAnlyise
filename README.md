@@ -1,2 +1,2 @@
-# StockSentimentAnlyise
+# Sentiment Analyze
 None
