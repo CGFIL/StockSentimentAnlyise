@@ -1,13 +1,15 @@
 import re
 import third.thulac as th
 from gensim.models import KeyedVectors
+from tensorflow import keras
 
 class Word2Vec(object):
-    def __init__(self, path="/home/jack/PycharmProjects/StockSentimentAnlyise/third/models"):
+    def __init__(self, len = 50, path="/home/jack/PycharmProjects/StockSentimentAnlyise/third/models"):
         '''
         WordToVec
         :param path: 存放模型路径
         '''
+        self.words_len = len;
         self.thu_model = th.thulac(model_path=path, seg_only=True)
         self.w2v_model = KeyedVectors.load_word2vec_format(path +  "/sgns.financial.bigram", binary=False)
 
@@ -19,7 +21,7 @@ class Word2Vec(object):
         :param sentence:待处理句子
         :return: srting
         '''
-        return re.sub("[\s+\.\!\/_,$%^*(+\"\']+|[+——！，。？、~@#￥%……&*（）]+", "", sentence)
+        return re.sub("[\s+\.\!\/_,$%^*(+\"\']+|[\[\]+——！，。？、~@#￥%……&*（）]+", "", sentence)
 
     def __parse_text_to_words(self, sentence):
         '''
@@ -37,8 +39,12 @@ class Word2Vec(object):
         :return: 向量
         '''
         print(word)
-        vec = self.w2v_model[word]
-        return vec
+        try:
+            vec_index = self.w2v_model.vocab[word].index
+        except KeyError:
+            vec_index = 0
+
+        return vec_index
 
     def parse_sentence_to_vectors(self, sentence):
         '''
@@ -50,3 +56,16 @@ class Word2Vec(object):
         print(words)
         vectors = [self.parse_word_to_vector(word) for word in words]
         return vectors
+
+    def convert_sentences_to_seqences(self, sentence_list):
+        '''
+        将所有句序列化处理，并返回结果
+        :param sentence_list: 所有句子列表
+        :return:
+        '''
+        seqences = []
+        for sentence in sentence_list:
+            seqences.append(self.parse_sentence_to_vectors(sentence))
+
+        return keras.preprocessing.sequence.pad_sequences(seqences, self.words_len, padding='pre', truncating='pre');
+
