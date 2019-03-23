@@ -92,12 +92,12 @@ def traning():
 
     model.add(GRU(units=32, return_sequences=True))
     model.add(GRU(units=16, return_sequences=False))
-    model.add(Dense(3, activation='sigmoid'))
+    model.add(Dense(3, activation='softmax'))
 
 
     #模型编译
-    model.compile(loss='mean_squared_error',
-                  optimizer='sgd',
+    model.compile(loss='categorical_crossentropy',
+                  optimizer='rmsprop',
                   metrics=['accuracy'])
 
     #模型训练 使用后10个数据测试
